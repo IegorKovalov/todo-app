@@ -1,25 +1,22 @@
-import logo from './logo.svg';
+import { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [message, setMessage] = useState('');
+
+    useEffect(() => {
+        fetch('http://127.0.0.1:5000/api/test')
+        .then(response => response.json())
+        .then(data => setMessage(data.message))
+        .catch(error => console.error('Error:', error));
+    }, []);
+
+    return (
+      <div className="App">
+        <h1>Todo App</h1>
+        <p>Message from Flask: {message}</p>
+      </div>
+    );
 }
 
 export default App;
