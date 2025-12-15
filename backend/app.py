@@ -88,9 +88,12 @@ def delete_todo(todo_id):
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute('DELETE FROM todos WHERE id = %s', (todo_id,))
+    deleted = cur.rowcount
     conn.commit()
     cur.close()
     conn.close()
+    if deleted == 0:
+        return jsonify({'error': 'Todo not found'}), 404
     return jsonify({'message': 'Todo deleted successfully'})
 
 if __name__ == '__main__':

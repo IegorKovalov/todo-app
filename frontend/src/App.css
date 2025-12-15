@@ -1,38 +1,165 @@
-.App {
-  text-align: center;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
+  padding: 20px;
+}
+
+.App {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px 30px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+h1 {
+  text-align: center;
+  color: #2d3748;
+  margin-bottom: 30px;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+/* Input Section */
+.todo-input {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.todo-input input {
+  flex: 1;
+  padding: 15px 20px;
+  font-size: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  transition: all 0.3s;
+  outline: none;
+}
+
+.todo-input input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.todo-input button {
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.App-link {
-  color: #61dafb;
+.todo-input button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.todo-input button:active {
+  transform: translateY(0);
+}
+
+/* Todo List */
+.todo-list {
+  margin-top: 20px;
+}
+
+.todo-list > p {
+  text-align: center;
+  color: #a0aec0;
+  font-size: 18px;
+  padding: 40px 0;
+}
+
+/* Todo Item */
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 18px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  background: #fafafa;
+  transition: all 0.3s;
+}
+
+.todo-item:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+  transform: translateX(5px);
+}
+
+.todo-item input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.todo-item span {
+  flex: 1;
+  font-size: 16px;
+  color: #2d3748;
+  word-break: break-word;
+}
+
+.todo-item span.completed {
+  text-decoration: line-through;
+  color: #a0aec0;
+  opacity: 0.6;
+}
+
+.todo-item button {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #fc8181;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.todo-item button:hover {
+  background: #f56565;
+  transform: scale(1.05);
+}
+
+.todo-item button:active {
+  transform: scale(0.95);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .App {
+    padding: 30px 20px;
   }
-  to {
-    transform: rotate(360deg);
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .todo-input {
+    flex-direction: column;
+  }
+
+  .todo-input button {
+    width: 100%;
   }
 }
