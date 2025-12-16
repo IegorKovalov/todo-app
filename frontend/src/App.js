@@ -60,13 +60,11 @@ function App() {
 
     const deleteTodo = async (id) => {
       try {
-        const response = await fetch (`http://127.0.0.1:5000/api/todos/${id}`, {
+        const response = await fetch(`http://127.0.0.1:5000/api/todos/${id}`, {
           method: 'DELETE',
         });
-        if (!response.ok) {
-          throw new Error('Failed to delete todo');
-        }
-        setTodos(todos.filter(todo => todo.id !== id));
+        if (!response.ok) throw new Error('Failed to delete todo');
+        await fetchTodos(); // re-fetch from backend to ensure it’s really gone
       } catch (error) {
         console.error('Error deleting todo:', error);
       }

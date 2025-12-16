@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from database import get_db_connection
-import os
+from database import get_db_session, Todo
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -27,74 +26,65 @@ def test():
 
 @app.route('/api/todos', methods=['GET'])
 def get_todos():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('SELECT id, title, completed FROM todos ORDER BY id')
-    todos = []
-    for row in cur.fetchall():
-        todos.append({
-            'id': row[0],
-            'title': row[1],
-            'completed': row[2]
-        })
-    cur.close()
-    conn.close()
-    return jsonify({'todos': todos})
+    session = get_db_session()
+    try:
+        todos = session.query(Todo).order_by(Todo.id).all()
+        return jsonify({'todos': [todo.to_dict() for todo in todos]})
+    finally:
+        session.close()
 
 @app.route('/api/todos', methods=['POST'])
 def create_todo():
     data = request.json
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute(
-        'INSERT INTO todos (title, completed) VALUES (%s, %s) RETURNING id, title, completed',
-        (data['title'], False)
-    )
-    row = cur.fetchone()
-    new_todo = {
-        'id': row[0],
-        'title': row[1],
-        'completed': row[2]
-    }
-    conn.commit()
-    cur.close()
-    conn.close()
-    return jsonify(new_todo), 201
+    session = get_db_session()
+    try:
+        new_todo = Todo(title=data['title'], completed=False)
+        session.add(new_todo)
+        session.commit()
+        session.refresh(new_todo)
+        return jsonify(new_todo.to_dict()), 201
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
 
 @app.route('/api/todos/<int:todo_id>', methods=['PUT'])
 def update_todo(todo_id):
     data = request.json
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute(
-        'UPDATE todos SET title = %s, completed = %s WHERE id = %s RETURNING id, title, completed',
-        (data['title'], data['completed'], todo_id)
-    )
-    row = cur.fetchone()
-    if row is None:
-        return jsonify({'error': 'Todo not found'}), 404
-    updated_todo = {
-        'id': row[0],
-        'title': row[1],
-        'completed': row[2]
-    }
-    conn.commit()
-    cur.close()
-    conn.close()
-    return jsonify(updated_todo)
+    session = get_db_session()
+    try:
+        todo = session.query(Todo).filter(Todo.id == todo_id).first()
+        if todo is None:
+            return jsonify({'error': 'Todo not found'}), 404
+        
+        todo.title = data['title']
+        todo.completed = data['completed']
+        session.commit()
+        session.refresh(todo)
+        return jsonify(todo.to_dict())
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
 
 @app.route('/api/todos/<int:todo_id>', methods=['DELETE'])
 def delete_todo(todo_id):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('DELETE FROM todos WHERE id = %s', (todo_id,))
-    deleted = cur.rowcount
-    conn.commit()
-    cur.close()
-    conn.close()
-    if deleted == 0:
-        return jsonify({'error': 'Todo not found'}), 404
-    return jsonify({'message': 'Todo deleted successfully'})
+    session = get_db_session()
+    try:
+        todo = session.query(Todo).filter(Todo.id == todo_id).first()
+        if todo is None:
+            return jsonify({'error': 'Todo not found'}), 404
+        
+        session.delete(todo)
+        session.commit()
+        return jsonify({'message': 'Todo deleted successfully'})
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='127.0.0.1')

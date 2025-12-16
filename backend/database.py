@@ -1,27 +1,43 @@
 import os
-import psycopg2
+from sqlalchemy import create_engine, Column, Integer, String, Boolean
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
 load_dotenv()
 
-def get_db_connection():
-    conn = psycopg2.connect(os.getenv('DATABASE_URL'))
-    return conn
+# Create SQLAlchemy engine
+engine = create_engine(os.getenv('DATABASE_URL'))
+
+# Create base class for declarative models
+Base = declarative_base()
+
+# Define Todo model
+class Todo(Base):
+    __tablename__ = 'todos'
+    
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+    completed = Column(Boolean, nullable=False, default=False)
+    
+    def to_dict(self):
+        """Convert Todo instance to dictionary"""
+        return {
+            'id': self.id,
+            'title': self.title,
+            'completed': self.completed
+        }
+
+# Create session factory
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def get_db_session():
+    """Get a database session"""
+    return SessionLocal()
 
 def init_db():
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    cur.execute('''
-    CREATE TABLE IF NOT EXISTS todos (
-        id SERIAL PRIMARY KEY,
-        title TEXT NOT NULL,
-        completed BOOLEAN NOT NULL DEFAULT FALSE
-    )
-    ''')
-    conn.commit()
-    cur.close()
-    conn.close()
+    """Initialize database tables"""
+    Base.metadata.create_all(bind=engine)
     print('Database initialized!')
 
 if __name__ == '__main__':
