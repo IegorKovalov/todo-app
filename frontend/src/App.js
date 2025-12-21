@@ -4,6 +4,9 @@ import './App.css';
 function App() {
     const [todos, setTodos] = useState([]);
     const [newTodo, setNewTodo] = useState('');
+    
+    // Use environment variable for API URL - no fallback
+    const API_URL = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
       fetchTodos();
@@ -11,7 +14,7 @@ function App() {
 
     const fetchTodos = async () => {
       try {
-        const response = await fetch ('http://127.0.0.1:5000/api/todos');
+        const response = await fetch(`${API_URL}/api/todos`);
         if (!response.ok) {
           throw new Error('Failed to fetch todos');
         }
@@ -25,7 +28,7 @@ function App() {
     const addTodo = async () => {
       if (!newTodo.trim()) return;
       try {
-        const response = await fetch ('http://127.0.0.1:5000/api/todos', {
+        const response = await fetch(`${API_URL}/api/todos`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -43,7 +46,7 @@ function App() {
     const toggleTodo = async (id) => {
       const todo = todos.find(t => t.id === id);
       try {
-        const response = await fetch(`http://127.0.0.1:5000/api/todos/${id}`, {
+        const response = await fetch(`${API_URL}/api/todos/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
@@ -60,11 +63,11 @@ function App() {
 
     const deleteTodo = async (id) => {
       try {
-        const response = await fetch(`http://127.0.0.1:5000/api/todos/${id}`, {
+        const response = await fetch(`${API_URL}/api/todos/${id}`, {
           method: 'DELETE',
         });
         if (!response.ok) throw new Error('Failed to delete todo');
-        await fetchTodos(); // re-fetch from backend to ensure it’s really gone
+        await fetchTodos();
       } catch (error) {
         console.error('Error deleting todo:', error);
       }
