@@ -1,13 +1,20 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Boolean
+from sqlalchemy import create_engine, Column, Integer, Text, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Create SQLAlchemy engine
-engine = create_engine(os.getenv('DATABASE_URL'))
+# Create SQLAlchemy engine with CockroachDB dialect
+database_url = os.getenv('DATABASE_URL')
+if not database_url:
+    raise ValueError("DATABASE_URL environment variable is not set")
+
+# Convert postgresql:// to cockroachdb:// for CockroachDB compatibility
+database_url = database_url.replace('postgresql://', 'cockroachdb://', 1).replace('postgres://', 'cockroachdb://', 1)
+
+engine = create_engine(database_url, pool_pre_ping=True)
 
 # Create base class for declarative models
 Base = declarative_base()
@@ -17,7 +24,7 @@ class Todo(Base):
     __tablename__ = 'todos'
     
     id = Column(Integer, primary_key=True)
-    title = Column(String, nullable=False)
+    title = Column(Text, nullable=False)
     completed = Column(Boolean, nullable=False, default=False)
     
     def to_dict(self):
